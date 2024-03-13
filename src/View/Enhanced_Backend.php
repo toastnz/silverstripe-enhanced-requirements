@@ -107,10 +107,12 @@ class Enhanced_Backend extends Requirements_Backend
 
         // CSS file links
         foreach ($this->getCSS() as $file => $params) {
+            $path = $this->pathForFile($file);
             $htmlAttributes = [
-                'rel' => 'stylesheet',
-                'type' => 'text/css',
-                'href' => $this->pathForFile($file),
+                'rel' => 'preload',
+                'as' => 'style',
+                'href' => $path,
+                'onload' => "this.onload=null;this.rel='stylesheet'"
             ];
             if (!empty($params['media'])) {
                 $htmlAttributes['media'] = $params['media'];
@@ -122,6 +124,14 @@ class Enhanced_Backend extends Requirements_Backend
                 $htmlAttributes['crossorigin'] = $params['crossorigin'];
             }
             $requirements .= HTML::createTag('link', $htmlAttributes);
+            $requirements .= "\n";
+
+            // Add a noscript fallback
+            $fallbackAttributes = [
+                'rel' => 'stylesheet',
+                'href' => $path,
+            ];
+            $requirements .= '<noscript>' . HTML::createTag('link', $fallbackAttributes) . '</noscript>';
             $requirements .= "\n";
         }
 
